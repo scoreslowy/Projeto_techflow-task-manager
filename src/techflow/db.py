@@ -52,7 +52,32 @@ def init_db_command() -> None:
     click.echo("Banco de dados inicializado.")
 
 
+
+@click.command("seed-demo")
+def seed_demo_command() -> None:
+    """Insere tarefas de demonstração sem duplicar dados existentes."""
+    database = get_db()
+    count = database.execute("SELECT COUNT(*) FROM tasks").fetchone()[0]
+    if count:
+        click.echo("O banco já possui tarefas; nenhuma demonstração foi inserida.")
+        return
+
+    tasks = [
+        ("Mapear fluxo da operação", "Levantar etapas da rotina logística.", "done"),
+        ("Criar protótipo do Kanban", "Validar a visualização com os stakeholders.", "done"),
+        ("Implementar cadastro de tarefas", "Disponibilizar formulário com validações.", "doing"),
+        ("Configurar testes automatizados", "Cobrir regras de negócio e rotas principais.", "todo"),
+        ("Preparar demonstração", "Organizar roteiro do vídeo pitch.", "todo"),
+    ]
+    database.executemany(
+        "INSERT INTO tasks (title, description, status) VALUES (?, ?, ?)", tasks
+    )
+    database.commit()
+    click.echo("Dados de demonstração inseridos.")
+
+
 def init_app(app) -> None:
     """Registra os recursos de banco na aplicação."""
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+    app.cli.add_command(seed_demo_command)

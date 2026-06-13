@@ -53,6 +53,12 @@ export PYTHONPATH=src
 python app.py
 ```
 
+Para inserir dados de demonstração antes de executar:
+
+```bash
+flask --app app seed-demo
+```
+
 Acesse `http://127.0.0.1:5000`.
 
 ## Testes e qualidade
