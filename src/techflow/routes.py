@@ -1,5 +1,7 @@
 """Rotas responsáveis pelo gerenciamento de tarefas."""
 
+from datetime import date
+
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 
 from .db import get_db
@@ -12,6 +14,12 @@ STATUS_LABELS = {
     "done": "Concluído",
 }
 
+PRIORITY_LABELS = {
+    "low": "Baixa",
+    "medium": "Média",
+    "high": "Alta",
+}
+
 
 
 def get_task(task_id: int):
@@ -22,7 +30,7 @@ def get_task(task_id: int):
     return task
 
 
-def validate_task(title: str, status: str) -> list[str]:
+def validate_task(title: str, status: str, priority: str, due_date: str) -> list[str]:
     """Valida os campos obrigatórios de uma tarefa."""
     errors: list[str] = []
     if len(title.strip()) < 3:
@@ -31,6 +39,13 @@ def validate_task(title: str, status: str) -> list[str]:
         errors.append("O título deve possuir no máximo 120 caracteres.")
     if status not in STATUS_LABELS:
         errors.append("O status informado é inválido.")
+    if priority not in PRIORITY_LABELS:
+        errors.append("A prioridade informada é inválida.")
+    if due_date:
+        try:
+            date.fromisoformat(due_date)
+        except ValueError:
+            errors.append("A data limite é inválida.")
     return errors
 
 
@@ -38,9 +53,24 @@ def validate_task(title: str, status: str) -> list[str]:
 def index():
     """Exibe as tarefas agrupadas em um quadro Kanban."""
     database = get_db()
-    tasks = database.execute(
-        "SELECT * FROM tasks ORDER BY created_at DESC, id DESC"
-    ).fetchall()
+    query = request.args.get("q", "").strip()
+    priority_filter = request.args.get("priority", "")
+    status_filter = request.args.get("status", "")
+
+    sql = "SELECT * FROM tasks WHERE 1 = 1"
+    params: list[str] = []
+    if query:
+        sql += " AND (title LIKE ? OR description LIKE ?)"
+        params.extend([f"%{query}%", f"%{query}%"])
+    if priority_filter in PRIORITY_LABELS:
+        sql += " AND priority = ?"
+        params.append(priority_filter)
+    if status_filter in STATUS_LABELS:
+        sql += " AND status = ?"
+        params.append(status_filter)
+    sql += " ORDER BY CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END, due_date, id DESC"
+
+    tasks = database.execute(sql, params).fetchall()
     grouped = {
         status: [task for task in tasks if task["status"] == status]
         for status in STATUS_LABELS
@@ -49,7 +79,10 @@ def index():
         "index.html",
         grouped=grouped,
         status_labels=STATUS_LABELS,
+        priority_labels=PRIORITY_LABELS,
         total=len(tasks),
+        today=date.today().isoformat(),
+        filters={"q": query, "priority": priority_filter, "status": status_filter},
     )
 
 
@@ -60,7 +93,9 @@ def create():
         title = request.form.get("title", "").strip()
         description = request.form.get("description", "").strip()
         status = request.form.get("status", "todo")
-        errors = validate_task(title, status)
+        priority = request.form.get("priority", "medium")
+        due_date = request.form.get("due_date", "")
+        errors = validate_task(title, status, priority, due_date)
 
         if errors:
             for error in errors:
@@ -68,8 +103,11 @@ def create():
         else:
             database = get_db()
             database.execute(
-                "INSERT INTO tasks (title, description, status) VALUES (?, ?, ?)",
-                (title, description, status),
+                """
+                INSERT INTO tasks (title, description, status, priority, due_date)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (title, description, status, priority, due_date or None),
             )
             database.commit()
             flash("Tarefa criada com sucesso.", "success")
@@ -79,6 +117,7 @@ def create():
         "form.html",
         page_title="Nova tarefa",
         status_labels=STATUS_LABELS,
+        priority_labels=PRIORITY_LABELS,
         task=None,
     )
 
@@ -91,7 +130,9 @@ def update(task_id: int):
         title = request.form.get("title", "").strip()
         description = request.form.get("description", "").strip()
         status = request.form.get("status", "todo")
-        errors = validate_task(title, status)
+        priority = request.form.get("priority", "medium")
+        due_date = request.form.get("due_date", "")
+        errors = validate_task(title, status, priority, due_date)
 
         if errors:
             for error in errors:
@@ -101,10 +142,11 @@ def update(task_id: int):
             database.execute(
                 """
                 UPDATE tasks
-                SET title = ?, description = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+                SET title = ?, description = ?, status = ?, priority = ?, due_date = ?,
+                    updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
                 """,
-                (title, description, status, task_id),
+                (title, description, status, priority, due_date or None, task_id),
             )
             database.commit()
             flash("Tarefa atualizada com sucesso.", "success")
@@ -114,6 +156,7 @@ def update(task_id: int):
         "form.html",
         page_title="Editar tarefa",
         status_labels=STATUS_LABELS,
+        priority_labels=PRIORITY_LABELS,
         task=task,
     )
 

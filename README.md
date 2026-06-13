@@ -13,6 +13,7 @@ Centralizar o cadastro e o acompanhamento das tarefas em um quadro simples, perm
 - Alteração do status entre A Fazer, Em Progresso e Concluído;
 - Edição e exclusão de tarefas;
 - Persistência local em SQLite;
+- Priorização, data limite e filtros de pesquisa;
 - Testes automatizados;
 - Integração contínua com GitHub Actions.
 
@@ -80,3 +81,17 @@ src/        código-fonte
 ## Licença
 
 Projeto acadêmico distribuído sob licença MIT.
+
+
+## Gestão da mudança de escopo
+
+Durante a validação do incremento inicial, o cliente informou que apenas visualizar o status não era suficiente para a operação logística. Tarefas críticas precisavam ser identificadas rapidamente e acompanhadas por prazo. A mudança foi analisada e incluída como um incremento adicional, sem remover as funcionalidades já entregues.
+
+Foram adicionados:
+
+- níveis de prioridade (`Baixa`, `Média` e `Alta`);
+- data limite opcional;
+- destaque visual para tarefas atrasadas;
+- busca por texto e filtros por prioridade e status.
+
+A decisão demonstra a adaptabilidade do desenvolvimento ágil: o backlog foi repriorizado e a nova funcionalidade foi implementada com validações e testes automatizados.

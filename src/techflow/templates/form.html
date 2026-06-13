@@ -23,6 +23,23 @@
             {% endfor %}
         </select>
 
+        <div class="form-grid">
+            <div>
+                <label for="priority">Prioridade</label>
+                <select id="priority" name="priority">
+                    {% set selected_priority = request.form.get('priority', task['priority'] if task else 'medium') %}
+                    {% for value, label in priority_labels.items() %}
+                        <option value="{{ value }}" {% if selected_priority == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="due_date">Data limite</label>
+                <input id="due_date" name="due_date" type="date"
+                       value="{{ request.form.get('due_date', task['due_date'] if task and task['due_date'] else '') }}">
+            </div>
+        </div>
+
         <div class="form-actions">
             <a class="button button-light" href="{{ url_for('tasks.index') }}">Cancelar</a>
             <button class="button button-primary" type="submit">Salvar tarefa</button>

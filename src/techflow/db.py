@@ -12,10 +12,13 @@ CREATE TABLE IF NOT EXISTS tasks (
     title TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     status TEXT NOT NULL DEFAULT 'todo',
+    priority TEXT NOT NULL DEFAULT 'medium',
+    due_date TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CHECK (length(trim(title)) BETWEEN 3 AND 120),
-    CHECK (status IN ('todo', 'doing', 'done'))
+    CHECK (status IN ('todo', 'doing', 'done')),
+    CHECK (priority IN ('low', 'medium', 'high'))
 );
 """
 
@@ -42,6 +45,13 @@ def init_db() -> None:
     """Cria as tabelas necessárias quando ainda não existem."""
     database = get_db()
     database.executescript(SCHEMA)
+    columns = {row["name"] for row in database.execute("PRAGMA table_info(tasks)")}
+    if "priority" not in columns:
+        database.execute(
+            "ALTER TABLE tasks ADD COLUMN priority TEXT NOT NULL DEFAULT 'medium'"
+        )
+    if "due_date" not in columns:
+        database.execute("ALTER TABLE tasks ADD COLUMN due_date TEXT")
     database.commit()
 
 
@@ -63,14 +73,18 @@ def seed_demo_command() -> None:
         return
 
     tasks = [
-        ("Mapear fluxo da operação", "Levantar etapas da rotina logística.", "done"),
-        ("Criar protótipo do Kanban", "Validar a visualização com os stakeholders.", "done"),
-        ("Implementar cadastro de tarefas", "Disponibilizar formulário com validações.", "doing"),
-        ("Configurar testes automatizados", "Cobrir regras de negócio e rotas principais.", "todo"),
-        ("Preparar demonstração", "Organizar roteiro do vídeo pitch.", "todo"),
+        ("Mapear fluxo da operação", "Levantar etapas da rotina logística.", "done", "high", "2026-06-08"),
+        ("Criar protótipo do Kanban", "Validar a visualização com os stakeholders.", "done", "medium", "2026-06-09"),
+        ("Implementar cadastro de tarefas", "Disponibilizar formulário com validações.", "doing", "high", "2026-06-15"),
+        ("Configurar testes automatizados", "Cobrir regras de negócio e rotas principais.", "todo", "high", "2026-06-16"),
+        ("Preparar demonstração", "Organizar roteiro do vídeo pitch.", "todo", "medium", "2026-06-18"),
     ]
     database.executemany(
-        "INSERT INTO tasks (title, description, status) VALUES (?, ?, ?)", tasks
+        """
+        INSERT INTO tasks (title, description, status, priority, due_date)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        tasks
     )
     database.commit()
     click.echo("Dados de demonstração inseridos.")

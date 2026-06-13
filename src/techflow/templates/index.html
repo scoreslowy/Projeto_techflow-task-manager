@@ -13,6 +13,24 @@
     </div>
 </section>
 
+<form class="filters" method="get">
+    <input name="q" value="{{ filters.q }}" placeholder="Buscar por título ou descrição" aria-label="Buscar tarefas">
+    <select name="priority" aria-label="Filtrar por prioridade">
+        <option value="">Todas as prioridades</option>
+        {% for value, label in priority_labels.items() %}
+            <option value="{{ value }}" {% if filters.priority == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <select name="status" aria-label="Filtrar por status">
+        <option value="">Todos os status</option>
+        {% for value, label in status_labels.items() %}
+            <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button class="button button-primary" type="submit">Filtrar</button>
+    <a class="button button-light" href="{{ url_for('tasks.index') }}">Limpar</a>
+</form>
+
 <section class="board" aria-label="Quadro Kanban">
     {% for status, label in status_labels.items() %}
     <article class="column column-{{ status }}">
@@ -23,6 +41,14 @@
         <div class="cards">
             {% for task in grouped[status] %}
             <div class="task-card">
+                <div class="task-meta">
+                    <span class="priority priority-{{ task['priority'] }}">{{ priority_labels[task['priority']] }}</span>
+                    {% if task['due_date'] %}
+                        <span class="due-date {% if task['status'] != 'done' and task['due_date'] < today %}overdue{% endif %}">
+                            Prazo: {{ task['due_date'] }}
+                        </span>
+                    {% endif %}
+                </div>
                 <h3>{{ task['title'] }}</h3>
                 <p>{{ task['description'] or 'Sem descrição.' }}</p>
                 <small>Criada em {{ task['created_at'] }}</small>

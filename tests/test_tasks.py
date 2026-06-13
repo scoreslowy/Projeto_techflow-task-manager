@@ -18,6 +18,8 @@ def test_create_task(client, app):
             "title": "Validar entrega",
             "description": "Conferir critérios da atividade",
             "status": "doing",
+            "priority": "high",
+            "due_date": "2026-06-20",
         },
         follow_redirects=True,
     )
@@ -30,12 +32,20 @@ def test_create_task(client, app):
         ).fetchone()
         assert task is not None
         assert task["status"] == "doing"
+        assert task["priority"] == "high"
+        assert task["due_date"] == "2026-06-20"
 
 
 def test_rejects_short_title(client):
     response = client.post(
         "/tasks/new",
-        data={"title": "Oi", "description": "Inválida", "status": "todo"},
+        data={
+            "title": "Oi",
+            "description": "Inválida",
+            "status": "todo",
+            "priority": "medium",
+            "due_date": "",
+        },
     )
 
     assert response.status_code == 200
@@ -49,6 +59,8 @@ def test_update_task(client, app):
             "title": "Tarefa atualizada",
             "description": "Descrição revisada",
             "status": "done",
+            "priority": "low",
+            "due_date": "2026-06-30",
         },
         follow_redirects=True,
     )
@@ -75,3 +87,22 @@ def test_missing_task_returns_404(client):
     response = client.get("/tasks/999/edit")
 
     assert response.status_code == 404
+
+
+def test_filter_by_priority(client, app):
+    with app.app_context():
+        database = get_db()
+        database.execute(
+            """
+            INSERT INTO tasks (title, description, status, priority)
+            VALUES (?, ?, ?, ?)
+            """,
+            ("Tarefa crítica", "Deve aparecer no filtro", "todo", "high"),
+        )
+        database.commit()
+
+    response = client.get("/?priority=high")
+
+    assert response.status_code == 200
+    assert b"Tarefa cr" in response.data
+    assert b"Tarefa inicial" not in response.data
