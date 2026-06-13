@@ -26,6 +26,12 @@
                 <h3>{{ task['title'] }}</h3>
                 <p>{{ task['description'] or 'Sem descrição.' }}</p>
                 <small>Criada em {{ task['created_at'] }}</small>
+                <div class="card-actions">
+                    <a href="{{ url_for('tasks.update', task_id=task['id']) }}">Editar</a>
+                    <form method="post" action="{{ url_for('tasks.delete', task_id=task['id']) }}" onsubmit="return confirm('Excluir esta tarefa?');">
+                        <button type="submit">Excluir</button>
+                    </form>
+                </div>
             </div>
             {% else %}
             <div class="empty-state">Nenhuma tarefa nesta etapa.</div>

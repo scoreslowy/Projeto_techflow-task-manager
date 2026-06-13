@@ -67,3 +67,7 @@ footer { padding: 30px; text-align: center; color: #7b8596; font-size: .85rem; }
     .board { grid-template-columns: 1fr; }
     .hero { align-items: stretch; flex-direction: column; }
 }
+
+.card-actions { display: flex; align-items: center; gap: 14px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #edf0f5; }
+.card-actions a, .card-actions button { border: 0; padding: 0; background: none; color: #28765f; font: inherit; font-size: .85rem; font-weight: 800; cursor: pointer; }
+.card-actions button { color: #b13b3b; }

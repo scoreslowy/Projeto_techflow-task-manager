@@ -1,6 +1,6 @@
 """Rotas responsáveis pelo gerenciamento de tarefas."""
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 
 from .db import get_db
 
@@ -11,6 +11,15 @@ STATUS_LABELS = {
     "doing": "Em Progresso",
     "done": "Concluído",
 }
+
+
+
+def get_task(task_id: int):
+    """Busca uma tarefa ou interrompe a requisição com erro 404."""
+    task = get_db().execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
+    if task is None:
+        abort(404, description="Tarefa não encontrada.")
+    return task
 
 
 def validate_task(title: str, status: str) -> list[str]:
@@ -72,3 +81,49 @@ def create():
         status_labels=STATUS_LABELS,
         task=None,
     )
+
+
+@bp.route("/tasks/<int:task_id>/edit", methods=("GET", "POST"))
+def update(task_id: int):
+    """Atualiza os dados de uma tarefa existente."""
+    task = get_task(task_id)
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        description = request.form.get("description", "").strip()
+        status = request.form.get("status", "todo")
+        errors = validate_task(title, status)
+
+        if errors:
+            for error in errors:
+                flash(error, "error")
+        else:
+            database = get_db()
+            database.execute(
+                """
+                UPDATE tasks
+                SET title = ?, description = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """,
+                (title, description, status, task_id),
+            )
+            database.commit()
+            flash("Tarefa atualizada com sucesso.", "success")
+            return redirect(url_for("tasks.index"))
+
+    return render_template(
+        "form.html",
+        page_title="Editar tarefa",
+        status_labels=STATUS_LABELS,
+        task=task,
+    )
+
+
+@bp.post("/tasks/<int:task_id>/delete")
+def delete(task_id: int):
+    """Exclui uma tarefa após confirmação na interface."""
+    get_task(task_id)
+    database = get_db()
+    database.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+    database.commit()
+    flash("Tarefa excluída com sucesso.", "success")
+    return redirect(url_for("tasks.index"))
