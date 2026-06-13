@@ -21,6 +21,10 @@ def create_app(test_config: dict | None = None) -> Flask:
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
     db.init_app(app)
 
+    from . import routes
+
+    app.register_blueprint(routes.bp)
+
     with app.app_context():
         db.init_db()
 

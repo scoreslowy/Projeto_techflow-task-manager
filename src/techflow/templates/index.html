@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Quadro Kanban | TechFlow{% endblock %}
+{% block content %}
+<section class="hero">
+    <div>
+        <p class="eyebrow">GESTÃO ÁGIL</p>
+        <h1>Quadro de tarefas</h1>
+        <p>Acompanhe o fluxo de trabalho da equipe em tempo real.</p>
+    </div>
+    <div class="summary">
+        <strong>{{ total }}</strong>
+        <span>tarefas cadastradas</span>
+    </div>
+</section>
+
+<section class="board" aria-label="Quadro Kanban">
+    {% for status, label in status_labels.items() %}
+    <article class="column column-{{ status }}">
+        <header>
+            <h2>{{ label }}</h2>
+            <span>{{ grouped[status]|length }}</span>
+        </header>
+        <div class="cards">
+            {% for task in grouped[status] %}
+            <div class="task-card">
+                <h3>{{ task['title'] }}</h3>
+                <p>{{ task['description'] or 'Sem descrição.' }}</p>
+                <small>Criada em {{ task['created_at'] }}</small>
+            </div>
+            {% else %}
+            <div class="empty-state">Nenhuma tarefa nesta etapa.</div>
+            {% endfor %}
+        </div>
+    </article>
+    {% endfor %}
+</section>
+{% endblock %}

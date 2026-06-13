@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} | TechFlow{% endblock %}
+{% block content %}
+<section class="form-shell">
+    <div>
+        <p class="eyebrow">CADASTRO</p>
+        <h1>{{ page_title }}</h1>
+        <p>Preencha os dados para organizar o trabalho da equipe.</p>
+    </div>
+    <form method="post" class="task-form">
+        <label for="title">Título</label>
+        <input id="title" name="title" maxlength="120" required
+               value="{{ request.form.get('title', task['title'] if task else '') }}">
+
+        <label for="description">Descrição</label>
+        <textarea id="description" name="description" rows="5">{{ request.form.get('description', task['description'] if task else '') }}</textarea>
+
+        <label for="status">Status</label>
+        <select id="status" name="status">
+            {% set selected_status = request.form.get('status', task['status'] if task else 'todo') %}
+            {% for value, label in status_labels.items() %}
+                <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <div class="form-actions">
+            <a class="button button-light" href="{{ url_for('tasks.index') }}">Cancelar</a>
+            <button class="button button-primary" type="submit">Salvar tarefa</button>
+        </div>
+    </form>
+</section>
+{% endblock %}
