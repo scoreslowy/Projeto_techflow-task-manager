@@ -5,7 +5,6 @@ import sqlite3
 import click
 from flask import current_app, g
 
-
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,7 +61,6 @@ def init_db_command() -> None:
     click.echo("Banco de dados inicializado.")
 
 
-
 @click.command("seed-demo")
 def seed_demo_command() -> None:
     """Insere tarefas de demonstração sem duplicar dados existentes."""
@@ -73,18 +71,48 @@ def seed_demo_command() -> None:
         return
 
     tasks = [
-        ("Mapear fluxo da operação", "Levantar etapas da rotina logística.", "done", "high", "2026-06-08"),
-        ("Criar protótipo do Kanban", "Validar a visualização com os stakeholders.", "done", "medium", "2026-06-09"),
-        ("Implementar cadastro de tarefas", "Disponibilizar formulário com validações.", "doing", "high", "2026-06-15"),
-        ("Configurar testes automatizados", "Cobrir regras de negócio e rotas principais.", "todo", "high", "2026-06-16"),
-        ("Preparar demonstração", "Organizar roteiro do vídeo pitch.", "todo", "medium", "2026-06-18"),
+        (
+            "Mapear fluxo da operação",
+            "Levantar etapas da rotina logística.",
+            "done",
+            "high",
+            "2026-06-08",
+        ),
+        (
+            "Criar protótipo do Kanban",
+            "Validar a visualização com os stakeholders.",
+            "done",
+            "medium",
+            "2026-06-09",
+        ),
+        (
+            "Implementar cadastro de tarefas",
+            "Disponibilizar formulário com validações.",
+            "doing",
+            "high",
+            "2026-06-15",
+        ),
+        (
+            "Configurar testes automatizados",
+            "Cobrir regras de negócio e rotas principais.",
+            "todo",
+            "high",
+            "2026-06-16",
+        ),
+        (
+            "Preparar demonstração",
+            "Organizar roteiro do vídeo pitch.",
+            "todo",
+            "medium",
+            "2026-06-18",
+        ),
     ]
     database.executemany(
         """
         INSERT INTO tasks (title, description, status, priority, due_date)
         VALUES (?, ?, ?, ?, ?)
         """,
-        tasks
+        tasks,
     )
     database.commit()
     click.echo("Dados de demonstração inseridos.")

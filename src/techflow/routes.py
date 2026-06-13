@@ -21,7 +21,6 @@ PRIORITY_LABELS = {
 }
 
 
-
 def get_task(task_id: int):
     """Busca uma tarefa ou interrompe a requisição com erro 404."""
     task = get_db().execute("SELECT * FROM tasks WHERE id = ?", (task_id,)).fetchone()
@@ -68,7 +67,10 @@ def index():
     if status_filter in STATUS_LABELS:
         sql += " AND status = ?"
         params.append(status_filter)
-    sql += " ORDER BY CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END, due_date, id DESC"
+    sql += (
+        " ORDER BY CASE priority WHEN 'high' THEN 1 "
+        "WHEN 'medium' THEN 2 ELSE 3 END, due_date, id DESC"
+    )
 
     tasks = database.execute(sql, params).fetchall()
     grouped = {
