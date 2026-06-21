@@ -1,3 +1,7 @@
+Nome:Claudio guilherme Gomes Alves
+RA: 75955
+Instituição: Unifecaf
+
 # TechFlow Task Manager
 
 Sistema web acadêmico de gerenciamento de tarefas desenvolvido para a empresa fictícia **TechFlow Solutions**, atendendo a uma startup de logística que precisa acompanhar o fluxo de trabalho, priorizar atividades críticas e monitorar o andamento da equipe.
@@ -45,15 +49,6 @@ $env:PYTHONPATH="src"
 python app.py
 ```
 
-No Linux/macOS:
-
-```bash
-source .venv/bin/activate
-pip install -r requirements-dev.txt
-export PYTHONPATH=src
-python app.py
-```
-
 Para inserir dados de demonstração antes de executar:
 
 ```bash
@@ -95,3 +90,11 @@ Foram adicionados:
 - busca por texto e filtros por prioridade e status.
 
 A decisão demonstra a adaptabilidade do desenvolvimento ágil: o backlog foi repriorizado e a nova funcionalidade foi implementada com validações e testes automatizados.
+
+## Validação de qualidade
+
+O projeto foi validado localmente com:
+
+- 8 testes automatizados aprovados com Pytest;
+- análise estática concluída sem erros com Ruff;
+- validação manual das operações de cadastro, consulta, edição, exclusão, filtros, prioridade e data limite

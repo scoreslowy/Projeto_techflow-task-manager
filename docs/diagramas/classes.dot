@@ -1,0 +1,18 @@
+digraph Classes {
+  graph [rankdir=TB, bgcolor="white", pad=0.35, nodesep=0.65, ranksep=0.75, fontname="DejaVu Sans"];
+  node [shape=record, fontname="DejaVu Sans", fontsize=10, color="#334155", penwidth=1.4, style=filled, fillcolor="#f8fafc"];
+  edge [fontname="DejaVu Sans", fontsize=9, color="#475569"];
+
+  AppFactory [label="{AppFactory|+ create_app(config): Flask|+ registra rotas\l+ inicializa banco\l}", fillcolor="#ecfdf5"];
+  TaskController [label="{TaskController|+ index()\l+ create()\l+ update(task_id)\l+ delete(task_id)\l+ validate_task()\l}", fillcolor="#eff6ff"];
+  Task [label="{Task|+ id: int\l+ title: str\l+ description: str\l+ status: str\l+ priority: str\l+ due_date: date\l+ created_at: datetime\l+ updated_at: datetime\l}", fillcolor="#fff7ed"];
+  Database [label="{Database|+ get_db(): Connection\l+ init_db()\l+ close_db()\l+ seed_demo()\l}", fillcolor="#f5f3ff"];
+  TestSuite [label="{TestSuite|+ test_health()\l+ test_create_task()\l+ test_update_task()\l+ test_delete_task()\l+ test_filter_by_priority()\l}", fillcolor="#fef2f2"];
+
+  AppFactory -> TaskController [label="registra", arrowhead=vee];
+  AppFactory -> Database [label="inicializa", arrowhead=vee];
+  TaskController -> Database [label="consulta/persiste", arrowhead=vee];
+  Database -> Task [label="0..*", arrowhead=odiamond];
+  TestSuite -> AppFactory [label="instancia", style=dashed, arrowhead=vee];
+  TestSuite -> TaskController [label="valida", style=dashed, arrowhead=vee];
+}

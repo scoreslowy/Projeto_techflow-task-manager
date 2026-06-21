@@ -1,0 +1,43 @@
+digraph UseCases {
+  graph [rankdir=LR, bgcolor="white", pad=0.35, nodesep=0.55, ranksep=0.9, fontname="DejaVu Sans"];
+  node [fontname="DejaVu Sans", fontsize=11];
+  edge [fontname="DejaVu Sans", fontsize=9, color="#475569"];
+
+  gestor [shape=plaintext, label="<<ator>>\nGestor de Projeto"];
+  membro [shape=plaintext, label="<<ator>>\nMembro da Equipe"];
+  ci [shape=plaintext, label="<<sistema externo>>\nGitHub Actions"];
+
+  subgraph cluster_system {
+    label="TechFlow Task Manager";
+    color="#1f8f72";
+    penwidth=2;
+    style="rounded";
+    margin=22;
+
+    consultar [shape=ellipse, label="Consultar quadro\nde tarefas", style=filled, fillcolor="#ecfdf5"];
+    criar [shape=ellipse, label="Criar tarefa", style=filled, fillcolor="#f8fafc"];
+    editar [shape=ellipse, label="Editar tarefa", style=filled, fillcolor="#f8fafc"];
+    excluir [shape=ellipse, label="Excluir tarefa", style=filled, fillcolor="#f8fafc"];
+    status [shape=ellipse, label="Alterar status", style=filled, fillcolor="#f8fafc"];
+    priorizar [shape=ellipse, label="Definir prioridade\ne prazo", style=filled, fillcolor="#fff7ed"];
+    filtrar [shape=ellipse, label="Pesquisar e filtrar", style=filled, fillcolor="#fff7ed"];
+    validar [shape=ellipse, label="Executar testes e\nvalidar qualidade", style=filled, fillcolor="#eff6ff"];
+  }
+
+  gestor -> consultar;
+  gestor -> criar;
+  gestor -> editar;
+  gestor -> excluir;
+  gestor -> priorizar;
+  gestor -> filtrar;
+
+  membro -> consultar;
+  membro -> criar;
+  membro -> editar;
+  membro -> status;
+  membro -> filtrar;
+
+  ci -> validar;
+  priorizar -> criar [label="<<extend>>", style=dashed];
+  filtrar -> consultar [label="<<extend>>", style=dashed];
+}
